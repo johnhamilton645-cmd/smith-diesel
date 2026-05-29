@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SMITH Diesel">
+<title>SMITH Diesel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8edf2;
+  --border: #d0d9e4;
+  --accent: #1a5fb4;
+  --accent2: #1248a0;
+  --accent-light: #e8f0fb;
+  --text: #1a2535;
+  --text2: #6b7d94;
+  --red: #c0392b;
+  --red-light: #fdf0ef;
+  --green: #1a7a4a;
+  --green-light: #eaf5ee;
+  --gold: #b8860b;
+  --gold-light: #fdf8e8;
+  --radius: 12px;
+}
+html, body { height: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); overscroll-behavior: none; }
+.app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* INSTALL BANNER */
+.install-banner { background: var(--accent); color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
+.install-banner.hidden { display: none; }
+.install-banner-text { flex: 1; font-weight: 600; line-height: 1.4; }
+.install-banner-text span { display: block; font-size: 11px; opacity: 0.75; margin-top: 1px; }
+.install-dismiss { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+/* HEADER */
+.header { background: var(--accent); padding: 14px 16px 12px; position: sticky; top: 0; z-index: 50; }
+.header-row { display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 18px; font-weight: 800; color: white; letter-spacing: 0.3px; }
+.logo span { font-weight: 500; font-size: 11px; color: rgba(255,255,255,0.65); display: block; margin-top: 1px; letter-spacing: 0.5px; text-transform: uppercase; }
+.header-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; color: white; padding: 7px 12px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+.header-btn:hover { background: rgba(255,255,255,0.25); }
+.header-menu { position: relative; }
+.header-dropdown { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; min-width: 180px; overflow: hidden; display: none; }
+.header-dropdown.open { display: block; }
+.dropdown-item { padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background: var(--bg); }
+
+/* SCREENS */
+.screen { display: none; flex: 1; overflow-y: auto; padding: 16px 16px 90px; }
+.screen.active { display: block; }
+
+/* SUMMARY BAR */
+.summary-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.summary-card { background: var(--surface); border-radius: var(--radius); padding: 12px 10px; text-align: center; border: 1px solid var(--border); }
+.summary-num { font-size: 22px; font-weight: 800; color: var(--accent); }
+.summary-label { font-size: 10px; color: var(--text2); font-weight: 600; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* FILTER ROW */
+.filter-row { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.filter-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* JOB CARDS */
+.job-list { display: flex; flex-direction: column; gap: 10px; }
+.job-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: box-shadow 0.15s; }
+.job-card:hover { box-shadow: 0 2px 12px rgba(26,95,180,0.12); }
+.job-card-header { padding: 14px 14px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.job-number { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.job-equipment { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.job-customer { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.status-open { background: var(--accent-light); color: var(--accent); }
+.status-closed { background: var(--green-light); color: var(--green); }
+.job-card-footer { padding: 8px 14px 12px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); background: var(--bg); }
+.job-meta { font-size: 12px; color: var(--text2); font-weight: 500; }
+.job-total { font-size: 15px; font-weight: 800; color: var(--text); }
+.job-notes-preview { padding: 0 14px 10px; font-size: 12px; color: var(--text2); font-style: italic; line-height: 1.4; }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text2); }
+.empty-icon { font-size: 40px; margin-bottom: 10px; }
+.empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.empty-sub { font-size: 13px; }
+
+/* DETAIL */
+.detail-header { background: var(--accent); margin: -16px -16px 16px; padding: 14px 16px; }
+.detail-back { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 10px; background: none; border: none; font-family: 'Inter', sans-serif; }
+.detail-back:hover { color: white; }
+.detail-equip { font-size: 22px; font-weight: 800; color: white; line-height: 1.2; }
+.detail-customer { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+.detail-meta-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.detail-status-btn { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+.detail-date { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+/* COST SUMMARY */
+.cost-summary { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; margin-bottom: 16px; }
+.cost-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
+.cost-label { color: var(--text2); font-weight: 500; }
+.cost-value { font-weight: 700; color: var(--text); }
+.cost-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+.cost-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+.cost-total-label { font-size: 15px; font-weight: 700; }
+.cost-total-value { font-size: 20px; font-weight: 800; color: var(--accent); }
+
+/* ACTION GRID */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.action-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 10px; text-align: center; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); transition: all 0.15s; }
+.action-btn:hover, .action-btn:active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+.action-btn-icon { font-size: 20px; margin-bottom: 4px; }
+.action-btn-danger { color: var(--red); }
+.action-btn-danger:hover, .action-btn-danger:active { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+/* LINE ITEMS */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.line-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.line-item { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 12px 14px; }
+.line-item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.line-item-info { flex: 1; }
+.line-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.line-item-meta { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+.line-item-amount { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.line-item-delete { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 16px; padding: 2px 4px; border-radius: 6px; margin-left: 4px; }
+.line-item-delete:hover { background: var(--red-light); color: var(--red); }
+.line-item-type { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.type-part { background: var(--gold-light); color: var(--gold); }
+.type-labor { background: var(--accent-light); color: var(--accent); }
+.type-diag { background: var(--surface2); color: var(--text2); }
+.receipt-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; margin-top: 8px; }
+
+/* NOTES */
+.notes-box { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; margin-bottom: 16px; }
+.notes-text { font-size: 14px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+.notes-empty { font-size: 13px; color: var(--text2); font-style: italic; }
+.edit-link { font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; background: none; border: none; font-family: 'Inter', sans-serif; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 430px; padding: 20px 20px 40px; max-height: 92vh; overflow-y: auto; }
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500; color: var(--text); background: var(--bg); transition: border-color 0.15s; }
+.form-input:focus { outline: none; border-color: var(--accent); background: white; }
+.form-textarea { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500; color: var(--text); background: var(--bg); min-height: 80px; resize: vertical; }
+.form-textarea:focus { outline: none; border-color: var(--accent); background: white; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+.submit-btn:hover { background: var(--accent2); }
+.cancel-btn { width: 100%; padding: 12px; background: none; color: var(--text2); border: 1.5px solid var(--border); border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+
+/* RECEIPT UPLOAD */
+.photo-upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+.photo-upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+.photo-upload-area.has-photo { border-style: solid; border-color: var(--accent); }
+.photo-preview-img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 8px; margin-top: 8px; display: none; }
+
+/* SETTINGS SCREEN */
+.settings-section { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
+.settings-section-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-row-label { font-size: 14px; font-weight: 600; }
+.settings-row-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.settings-action-btn { background: var(--accent-light); color: var(--accent); border: none; border-radius: 8px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.settings-action-btn.danger { background: var(--red-light); color: var(--red); }
+
+/* IMAGE VIEWER */
+.img-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; display: none; align-items: center; justify-content: center; flex-direction: column; }
+.img-viewer.open { display: flex; }
+.img-viewer img { max-width: 95vw; max-height: 80vh; border-radius: 8px; object-fit: contain; }
+.img-viewer-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px); background: var(--text); color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 400; transition: all 0.3s; white-space: nowrap; opacity: 0; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* TOGGLE SWITCH */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+.toggle-label { font-size: 14px; font-weight: 600; color: var(--text); }
+.toggle-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 26px; cursor: pointer; transition: background 0.2s; }
+.toggle-slider:before { content: ''; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.toggle-switch input:checked + .toggle-slider { background: var(--green); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+/* PRINT / SHARE */
+@media print {
+  .no-print, .install-banner, .header-dropdown { display: none !important; }
+  .app { max-width: 100%; }
+  .screen { padding: 0 !important; }
+  .detail-header { background: #1a5fb4 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  body { background: white; }
+  .line-item { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- IMAGE VIEWER -->
+<div class="img-viewer" id="img-viewer" onclick="closeImgViewer()">
+  <button class="img-viewer-close" onclick="closeImgViewer()">✕</button>
+  <img id="img-viewer-img" src="" alt="Receipt">
+</div>
+
+<div class="app">
+
+  <!-- INSTALL BANNER -->
+  <div class="install-banner hidden" id="install-banner">
+    <div class="install-banner-text">
+      📱 Add to Home Screen
+      <span>Tap Share → "Add to Home Screen" for quick access</span>
+    </div>
+    <button class="install-dismiss" onclick="dismissInstall()">Got it</button>
+  </div>
+
+  <!-- ========== LIST SCREEN ========== -->
+  <div id="screen-list" class="screen active">
+    <div class="header no-print">
+      <div class="header-row">
+        <div class="logo">SMITH Diesel <span>Equipment Job Costing</span></div>
+        <div style="display:flex;gap:8px">
+          <button class="header-btn" onclick="openNewJobModal()">+ New Job</button>
+          <div class="header-menu">
+            <button class="header-btn" onclick="toggleMenu()">⋯</button>
+            <div class="header-dropdown" id="header-dropdown">
+              <div class="dropdown-item" onclick="goSettings(); toggleMenu()">⚙️ Settings</div>
+              <div class="dropdown-item" onclick="exportCSV(); toggleMenu()">📊 Export CSV</div>
+              <div class="dropdown-item" onclick="exportBackup(); toggleMenu()">💾 Backup Data</div>
+              <div class="dropdown-item" onclick="document.getElementById('restore-input').click(); toggleMenu()">📂 Restore Backup</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-top:16px">
+      <div class="summary-bar">
+        <div class="summary-card"><div class="summary-num" id="sum-open">0</div><div class="summary-label">Open Jobs</div></div>
+        <div class="summary-card"><div class="summary-num" id="sum-closed">0</div><div class="summary-label">Closed</div></div>
+        <div class="summary-card"><div class="summary-num" id="sum-total">$0</div><div class="summary-label">Total Billed</div></div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All Jobs</button>
+        <button class="filter-btn" id="filter-open" onclick="setFilter('open')">Open</button>
+        <button class="filter-btn" id="filter-closed" onclick="setFilter('closed')">Closed</button>
+      </div>
+      <div class="job-list" id="job-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== DETAIL SCREEN ========== -->
+  <div id="screen-detail" class="screen">
+    <div class="detail-header no-print">
+      <button class="detail-back" onclick="goToList()">← All Jobs</button>
+      <div class="detail-equip" id="detail-equip">—</div>
+      <div class="detail-customer" id="detail-customer">—</div>
+      <div class="detail-meta-row">
+        <button class="detail-status-btn" id="detail-status-btn" onclick="toggleJobStatus()">Open</button>
+        <span class="detail-date" id="detail-date">—</span>
+      </div>
+    </div>
+
+    <div class="cost-summary">
+      <div class="cost-row"><span class="cost-label">Parts</span><span class="cost-value" id="cost-parts">$0.00</span></div>
+      <div class="cost-row"><span class="cost-label">Labor</span><span class="cost-value" id="cost-labor">$0.00</span></div>
+      <div class="cost-row"><span class="cost-label">Diagnostics</span><span class="cost-value" id="cost-diag">$0.00</span></div>
+      <hr class="cost-divider">
+      <div class="cost-total-row"><span class="cost-total-label">Total</span><span class="cost-total-value" id="cost-total">$0.00</span></div>
+    </div>
+
+    <div class="action-grid no-print">
+      <div class="action-btn" onclick="openPartModal()"><div class="action-btn-icon">🔩</div>Log Part</div>
+      <div class="action-btn" onclick="openLaborModal()"><div class="action-btn-icon">⏱️</div>Log Hours</div>
+      <div class="action-btn" onclick="openDiagModal()"><div class="action-btn-icon">🔍</div>Log Diagnostic</div>
+      <div class="action-btn" onclick="openInvoiceModal()" style="border-color:var(--green);color:var(--green)"><div class="action-btn-icon">🧾</div>Customer Invoice</div>
+      <div class="action-btn" onclick="generatePDF()"><div class="action-btn-icon">📄</div>Cost Report PDF</div>
+      <div class="action-btn action-btn-danger" onclick="confirmDeleteJob()"><div class="action-btn-icon">🗑️</div>Delete Job</div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Line Items</div>
+    </div>
+    <div class="line-items" id="line-items"></div>
+
+    <div class="section-header">
+      <div class="section-title">Job Notes</div>
+      <button class="edit-link no-print" onclick="openNotesModal()">Edit</button>
+    </div>
+    <div class="notes-box">
+      <div id="detail-notes-display" class="notes-empty">No notes yet.</div>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS SCREEN ========== -->
+  <div id="screen-settings" class="screen">
+    <div class="header no-print">
+      <div class="header-row">
+        <button class="detail-back" style="margin-bottom:0" onclick="goToList()">← Jobs</button>
+        <div class="logo" style="font-size:15px">Settings</div>
+        <div style="width:60px"></div>
+      </div>
+    </div>
+    <div style="padding-top:16px">
+      <div class="settings-section">
+        <div class="settings-section-title">Business Info</div>
+        <div class="form-group"><label class="form-label">Business Name</label><input class="form-input" id="set-bizname" placeholder="SMITH Diesel"></div>
+        <div class="form-group"><label class="form-label">Owner / Contact</label><input class="form-input" id="set-contact" placeholder="John Smith"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="set-phone" placeholder="(555) 555-5555" type="tel"></div>
+        <div class="form-group"><label class="form-label">Default Labor Rate ($/hr)</label><input class="form-input" id="set-rate" placeholder="85" type="number" inputmode="decimal"></div>
+        <button class="submit-btn" onclick="saveSettings()">Save Settings</button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Data</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Export CSV</div><div class="settings-row-sub">All closed jobs for accountant</div></div>
+          <button class="settings-action-btn" onclick="exportCSV()">Export</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Backup Jobs</div><div class="settings-row-sub">Save all data as a file</div></div>
+          <button class="settings-action-btn" onclick="exportBackup()">Backup</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Restore Backup</div><div class="settings-row-sub">Load a previously saved backup</div></div>
+          <button class="settings-action-btn" onclick="document.getElementById('restore-input').click()">Restore</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Clear All Data</div><div class="settings-row-sub">Permanently delete all jobs</div></div>
+          <button class="settings-action-btn danger" onclick="clearAllData()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CUSTOMER INVOICE MODAL -->
+<div class="modal-overlay" id="modal-invoice">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🧾 Customer Invoice</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5">This invoice is for the customer — your actual costs and labor rates will not be shown.</div>
+
+    <div class="form-group">
+      <label class="form-label">Parts Markup %</label>
+      <input class="form-input" id="inv-markup" type="number" inputmode="decimal" placeholder="e.g. 20" value="">
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">Enter 0 for no markup. Your cost price is never shown.</div>
+    </div>
+
+    <div style="background:var(--bg);border-radius:10px;padding:12px;margin-bottom:16px">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Show Itemized Parts</div>
+          <div class="toggle-sub">List each part with its price</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="inv-itemized" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Show Labor Detail</div>
+          <div class="toggle-sub">Off = shows "Labor Services — $X" only</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="inv-labor-detail">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Include Diagnostics</div>
+          <div class="toggle-sub">Show diagnostic charges on invoice</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="inv-show-diag" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="submit-btn" style="background:var(--green)" onclick="generateCustomerInvoice()">Generate Invoice PDF</button>
+    <button class="cancel-btn" onclick="closeModal('invoice')">Cancel</button>
+  </div>
+</div>
+<input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreBackup(this)">
+
+<!-- ========== MODALS ========== -->
+
+<!-- NEW JOB -->
+<div class="modal-overlay" id="modal-job">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New Job</div>
+    <div class="form-group"><label class="form-label">Equipment / Machine</label><input class="form-input" id="job-equip" placeholder="e.g. John Deere 6130R"></div>
+    <div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="job-customer-input" placeholder="e.g. Smith Farm"></div>
+    <div class="form-group"><label class="form-label">Notes / Description</label><textarea class="form-textarea" id="job-notes-input" placeholder="What's being worked on..."></textarea></div>
+    <button class="submit-btn" onclick="saveNewJob()">Create Job</button>
+    <button class="cancel-btn" onclick="closeModal('job')">Cancel</button>
+  </div>
+</div>
+
+<!-- LOG PART -->
+<div class="modal-overlay" id="modal-part">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log Part</div>
+    <div class="form-group"><label class="form-label">Part Name / Description</label><input class="form-input" id="part-name" placeholder="e.g. Hydraulic filter, belt #A94"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Vendor</label><input class="form-input" id="part-vendor" placeholder="e.g. NAPA"></div>
+      <div class="form-group"><label class="form-label">Cost ($)</label><input class="form-input" id="part-cost" type="number" inputmode="decimal" placeholder="0.00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Part Number (optional)</label><input class="form-input" id="part-number" placeholder="e.g. AF1735"></div>
+    <div class="form-group">
+      <label class="form-label">Receipt Photo (optional)</label>
+      <div class="photo-upload-area" id="part-photo-area" onclick="document.getElementById('part-photo-input').click()">
+        <input type="file" id="part-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoSelect(this,'part-photo-preview','part-photo-area')">
+        <div id="part-photo-placeholder">📷 Tap to snap or upload receipt</div>
+        <img class="photo-preview-img" id="part-photo-preview">
+      </div>
+    </div>
+    <button class="submit-btn" onclick="savePart()">Save Part</button>
+    <button class="cancel-btn" onclick="closeModal('part')">Cancel</button>
+  </div>
+</div>
+
+<!-- LOG LABOR -->
+<div class="modal-overlay" id="modal-labor">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log Hours</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Hours Worked</label><input class="form-input" id="labor-hours" type="number" inputmode="decimal" placeholder="e.g. 2.5"></div>
+      <div class="form-group"><label class="form-label">Rate ($/hr)</label><input class="form-input" id="labor-rate" type="number" inputmode="decimal" placeholder="85"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="labor-desc" placeholder="e.g. Hydraulic pump replacement"></div>
+    <div class="form-group"><label class="form-label">Technician</label><input class="form-input" id="labor-tech" placeholder="e.g. Jake"></div>
+    <button class="submit-btn" onclick="saveLabor()">Save Hours</button>
+    <button class="cancel-btn" onclick="closeModal('labor')">Cancel</button>
+  </div>
+</div>
+
+<!-- LOG DIAGNOSTIC -->
+<div class="modal-overlay" id="modal-diag">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log Diagnostic</div>
+    <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="diag-desc" placeholder="e.g. Service ADVISOR scan, fault codes"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tool Used</label><input class="form-input" id="diag-tool" placeholder="e.g. Service ADVISOR"></div>
+      <div class="form-group"><label class="form-label">Charge ($)</label><input class="form-input" id="diag-cost" type="number" inputmode="decimal" placeholder="0.00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Fault Codes / Findings</label><textarea class="form-textarea" id="diag-findings" placeholder="Enter fault codes or findings..." style="min-height:70px"></textarea></div>
+    <button class="submit-btn" onclick="saveDiag()">Save Diagnostic</button>
+    <button class="cancel-btn" onclick="closeModal('diag')">Cancel</button>
+  </div>
+</div>
+
+<!-- EDIT NOTES -->
+<div class="modal-overlay" id="modal-notes">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Job Notes</div>
+    <div class="form-group"><textarea class="form-textarea" id="notes-input" placeholder="Add notes about this job..." style="min-height:140px"></textarea></div>
+    <button class="submit-btn" onclick="saveNotes()">Save Notes</button>
+    <button class="cancel-btn" onclick="closeModal('notes')">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ===================== CONSTANTS =====================
+const SAVE_KEY = 'smithdiesel_v2';
+const SETTINGS_KEY = 'smithdiesel_settings';
+
+// ===================== STATE =====================
+let jobs = [];
+let settings = {};
+let currentJobId = null;
+let currentFilter = 'all';
+let partPhotoData = null;
+
+// ===================== STORAGE =====================
+function loadAll() {
+  try { jobs = JSON.parse(localStorage.getItem(SAVE_KEY) || '[]'); } catch(e) { jobs = []; }
+  try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch(e) { settings = {}; }
+}
+function saveJobs() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(jobs)); } catch(e) { toast('Storage full — try exporting and clearing old jobs'); } }
+function saveSettings() {
+  settings.bizName = document.getElementById('set-bizname').value.trim() || 'SMITH Diesel';
+  settings.contact = document.getElementById('set-contact').value.trim();
+  settings.phone = document.getElementById('set-phone').value.trim();
+  settings.defaultRate = parseFloat(document.getElementById('set-rate').value) || 0;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  toast('Settings saved ✓');
+}
+
+// ===================== HELPERS =====================
+function genId() { return 'J' + Date.now().toString(36).toUpperCase().slice(-6); }
+function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
+function fmtShort(n) { return n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : '$' + Math.round(n); }
+function jobTotal(job) { return (job.items || []).reduce((s, i) => s + Number(i.amount || 0), 0); }
+function jobPartsCost(job) { return (job.items || []).filter(i=>i.type==='part').reduce((s,i)=>s+Number(i.amount),0); }
+function jobLaborCost(job) { return (job.items || []).filter(i=>i.type==='labor').reduce((s,i)=>s+Number(i.amount),0); }
+function jobDiagCost(job) { return (job.items || []).filter(i=>i.type==='diag').reduce((s,i)=>s+Number(i.amount),0); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===================== SCREENS =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function goToList() { currentJobId = null; renderList(); showScreen('list'); }
+function goSettings() {
+  document.getElementById('set-bizname').value = settings.bizName || '';
+  document.getElementById('set-contact').value = settings.contact || '';
+  document.getElementById('set-phone').value = settings.phone || '';
+  document.getElementById('set-rate').value = settings.defaultRate || '';
+  showScreen('settings');
+}
+
+// ===================== MENU =====================
+function toggleMenu() {
+  document.getElementById('header-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.header-menu')) document.getElementById('header-dropdown').classList.remove('open');
+});
+
+// ===================== INSTALL BANNER =====================
+function checkInstallBanner() {
+  const dismissed = localStorage.getItem('install_dismissed');
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if (!dismissed && !isStandalone && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    document.getElementById('install-banner').classList.remove('hidden');
+  }
+}
+function dismissInstall() {
+  localStorage.setItem('install_dismissed', '1');
+  document.getElementById('install-banner').classList.add('hidden');
+}
+
+// ===================== LIST =====================
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + f).classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const openJobs = jobs.filter(j => j.status === 'open');
+  const closedJobs = jobs.filter(j => j.status === 'closed');
+  const totalBilled = closedJobs.reduce((s, j) => s + jobTotal(j), 0);
+  document.getElementById('sum-open').textContent = openJobs.length;
+  document.getElementById('sum-closed').textContent = closedJobs.length;
+  document.getElementById('sum-total').textContent = fmtShort(totalBilled);
+
+  let filtered = jobs;
+  if (currentFilter === 'open') filtered = openJobs;
+  if (currentFilter === 'closed') filtered = closedJobs;
+  const sorted = [...filtered].sort((a, b) => b.createdAt - a.createdAt);
+
+  const list = document.getElementById('job-list');
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Tap "+ New Job" to get started</div></div>';
+    return;
+  }
+  list.innerHTML = sorted.map(job => {
+    const total = jobTotal(job);
+    const date = new Date(job.createdAt).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    const itemCount = (job.items || []).length;
+    return `<div class="job-card" onclick="openJob('${job.id}')">
+      <div class="job-card-header">
+        <div>
+          <div class="job-number">Job #${job.id}</div>
+          <div class="job-equipment">${escHtml(job.equipment)}</div>
+          <div class="job-customer">${escHtml(job.customer || 'No customer')}</div>
+        </div>
+        <span class="status-badge status-${job.status}">${job.status === 'open' ? 'Open' : 'Closed'}</span>
+      </div>
+      ${job.notes ? `<div class="job-notes-preview">${escHtml(job.notes.substring(0,80))}${job.notes.length>80?'...':''}</div>` : ''}
+      <div class="job-card-footer">
+        <span class="job-meta">${date} · ${itemCount} item${itemCount!==1?'s':''}</span>
+        <span class="job-total">${fmt(total)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===================== DETAIL =====================
+function openJob(id) {
+  currentJobId = id;
+  const job = jobs.find(j => j.id === id);
+  if (!job) return;
+  document.getElementById('detail-equip').textContent = job.equipment;
+  document.getElementById('detail-customer').textContent = job.customer || 'No customer';
+  document.getElementById('detail-date').textContent = new Date(job.createdAt).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  renderDetail();
+  showScreen('detail');
+}
+
+function renderDetail() {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+
+  const btn = document.getElementById('detail-status-btn');
+  if (job.status === 'open') {
+    btn.textContent = '● Open — tap to close';
+    btn.style.background = 'rgba(255,255,255,0.18)';
+    btn.style.color = 'white';
+  } else {
+    btn.textContent = '✓ Closed — tap to reopen';
+    btn.style.background = 'rgba(26,122,74,0.3)';
+    btn.style.color = '#90EDB0';
+  }
+
+  document.getElementById('cost-parts').textContent = fmt(jobPartsCost(job));
+  document.getElementById('cost-labor').textContent = fmt(jobLaborCost(job));
+  document.getElementById('cost-diag').textContent = fmt(jobDiagCost(job));
+  document.getElementById('cost-total').textContent = fmt(jobTotal(job));
+
+  const notesEl = document.getElementById('detail-notes-display');
+  if (job.notes) { notesEl.textContent = job.notes; notesEl.className = 'notes-text'; }
+  else { notesEl.textContent = 'No notes yet.'; notesEl.className = 'notes-empty'; }
+
+  const itemsEl = document.getElementById('line-items');
+  if (!job.items || job.items.length === 0) {
+    itemsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px">No items logged yet.</div>';
+    return;
+  }
+
+  itemsEl.innerHTML = [...job.items].reverse().map(item => {
+    let typeLabel = '', metaText = '';
+    if (item.type === 'part') {
+      typeLabel = '<span class="line-item-type type-part">Part</span>';
+      metaText = [item.vendor, item.partNumber].filter(Boolean).join(' · ');
+    } else if (item.type === 'labor') {
+      typeLabel = '<span class="line-item-type type-labor">Labor</span>';
+      metaText = [item.hours + ' hrs @ $' + item.rate + '/hr', item.tech].filter(Boolean).join(' · ');
+    } else {
+      typeLabel = '<span class="line-item-type type-diag">Diagnostic</span>';
+      metaText = [item.tool, item.findings].filter(Boolean).join(' · ');
+    }
+    const receiptImg = item.photo ? `<img class="receipt-thumb" src="${item.photo}" onclick="viewPhoto('${item.id}')" alt="Receipt">` : '';
+    return `<div class="line-item">
+      <div class="line-item-top">
+        <div class="line-item-info">
+          ${typeLabel}
+          <div class="line-item-name">${escHtml(item.name)}</div>
+          ${metaText ? `<div class="line-item-meta">${escHtml(metaText)}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span class="line-item-amount">${fmt(item.amount)}</span>
+          <button class="line-item-delete no-print" onclick="deleteItem('${item.id}')">✕</button>
+        </div>
+      </div>
+      ${receiptImg}
+    </div>`;
+  }).join('');
+}
+
+function toggleJobStatus() {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+  job.status = job.status === 'open' ? 'closed' : 'open';
+  saveJobs(); renderDetail();
+  toast(job.status === 'closed' ? 'Job closed ✓' : 'Job reopened');
+}
+
+function confirmDeleteJob() {
+  if (confirm('Delete this job and all its line items? Cannot be undone.')) {
+    jobs = jobs.filter(j => j.id !== currentJobId);
+    saveJobs(); toast('Job deleted'); goToList();
+  }
+}
+
+function deleteItem(itemId) {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+  job.items = (job.items || []).filter(i => i.id !== itemId);
+  saveJobs(); renderDetail(); toast('Item removed');
+}
+
+function printJob() { window.print(); }
+
+// ===================== PHOTO =====================
+function handlePhotoSelect(input, previewId, areaId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Compress to max 600px wide
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 600;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      partPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+      const prev = document.getElementById(previewId);
+      prev.src = partPhotoData;
+      prev.style.display = 'block';
+      document.getElementById(areaId).classList.add('has-photo');
+      document.getElementById('part-photo-placeholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function viewPhoto(itemId) {
+  const job = jobs.find(j => j.id === currentJobId);
+  const item = job && job.items.find(i => i.id === itemId);
+  if (!item || !item.photo) return;
+  document.getElementById('img-viewer-img').src = item.photo;
+  document.getElementById('img-viewer').classList.add('open');
+}
+function closeImgViewer() { document.getElementById('img-viewer').classList.remove('open'); }
+
+// ===================== MODALS =====================
+function openNewJobModal() { document.getElementById('modal-job').classList.add('open'); setTimeout(() => document.getElementById('job-equip').focus(), 100); }
+function openPartModal() {
+  partPhotoData = null;
+  document.getElementById('part-photo-preview').style.display = 'none';
+  document.getElementById('part-photo-preview').src = '';
+  document.getElementById('part-photo-area').classList.remove('has-photo');
+  document.getElementById('part-photo-placeholder').style.display = 'block';
+  document.getElementById('modal-part').classList.add('open');
+  setTimeout(() => document.getElementById('part-name').focus(), 100);
+}
+function openLaborModal() {
+  if (settings.defaultRate) document.getElementById('labor-rate').value = settings.defaultRate;
+  document.getElementById('modal-labor').classList.add('open');
+  setTimeout(() => document.getElementById('labor-hours').focus(), 100);
+}
+function openDiagModal() { document.getElementById('modal-diag').classList.add('open'); setTimeout(() => document.getElementById('diag-desc').focus(), 100); }
+function openNotesModal() {
+  const job = jobs.find(j => j.id === currentJobId);
+  document.getElementById('notes-input').value = job ? (job.notes || '') : '';
+  document.getElementById('modal-notes').classList.add('open');
+  setTimeout(() => document.getElementById('notes-input').focus(), 100);
+}
+function closeModal(name) { document.getElementById('modal-' + name).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+// ===================== SAVE ITEMS =====================
+function saveNewJob() {
+  const equip = document.getElementById('job-equip').value.trim();
+  if (!equip) { alert('Please enter equipment name.'); return; }
+  const job = { id: genId(), equipment: equip, customer: document.getElementById('job-customer-input').value.trim(), notes: document.getElementById('job-notes-input').value.trim(), status: 'open', createdAt: Date.now(), items: [] };
+  jobs.unshift(job); saveJobs(); closeModal('job');
+  document.getElementById('job-equip').value = '';
+  document.getElementById('job-customer-input').value = '';
+  document.getElementById('job-notes-input').value = '';
+  renderList(); toast('Job created ✓'); openJob(job.id);
+}
+
+function savePart() {
+  const name = document.getElementById('part-name').value.trim();
+  const cost = parseFloat(document.getElementById('part-cost').value) || 0;
+  if (!name) { alert('Please enter a part name.'); return; }
+  const job = jobs.find(j => j.id === currentJobId); if (!job) return;
+  job.items = job.items || [];
+  job.items.push({ id: 'I' + Date.now().toString(36), type: 'part', name, vendor: document.getElementById('part-vendor').value.trim(), partNumber: document.getElementById('part-number').value.trim(), amount: cost, photo: partPhotoData || null });
+  saveJobs(); closeModal('part');
+  ['part-name','part-vendor','part-cost','part-number'].forEach(id => document.getElementById(id).value = '');
+  partPhotoData = null;
+  renderDetail(); toast('Part logged ✓');
+}
+
+function saveLabor() {
+  const hours = parseFloat(document.getElementById('labor-hours').value) || 0;
+  const rate = parseFloat(document.getElementById('labor-rate').value) || 0;
+  if (!hours || !rate) { alert('Please enter hours and rate.'); return; }
+  const desc = document.getElementById('labor-desc').value.trim();
+  const job = jobs.find(j => j.id === currentJobId); if (!job) return;
+  job.items = job.items || [];
+  job.items.push({ id: 'I' + Date.now().toString(36), type: 'labor', name: desc || 'Labor', hours, rate, tech: document.getElementById('labor-tech').value.trim(), amount: hours * rate });
+  saveJobs(); closeModal('labor');
+  ['labor-hours','labor-rate','labor-desc','labor-tech'].forEach(id => document.getElementById(id).value = '');
+  renderDetail(); toast('Hours logged ✓');
+}
+
+function saveDiag() {
+  const desc = document.getElementById('diag-desc').value.trim();
+  const cost = parseFloat(document.getElementById('diag-cost').value) || 0;
+  if (!desc) { alert('Please enter a description.'); return; }
+  const job = jobs.find(j => j.id === currentJobId); if (!job) return;
+  job.items = job.items || [];
+  job.items.push({ id: 'I' + Date.now().toString(36), type: 'diag', name: desc, tool: document.getElementById('diag-tool').value.trim(), findings: document.getElementById('diag-findings').value.trim(), amount: cost });
+  saveJobs(); closeModal('diag');
+  ['diag-desc','diag-tool','diag-cost','diag-findings'].forEach(id => document.getElementById(id).value = '');
+  renderDetail(); toast('Diagnostic logged ✓');
+}
+
+function saveNotes() {
+  const job = jobs.find(j => j.id === currentJobId); if (!job) return;
+  job.notes = document.getElementById('notes-input').value.trim();
+  saveJobs(); closeModal('notes'); renderDetail(); toast('Notes saved ✓');
+}
+
+// ===================== PDF INVOICE =====================
+async function generatePDF() {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+  if (typeof window.jspdf === 'undefined' && typeof jspdf === 'undefined') {
+    toast('PDF library loading, try again in a moment');
+    return;
+  }
+  const { jsPDF } = window.jspdf || jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const W = 612, margin = 48, col2 = 400;
+  let y = 48;
+
+  // Header bar
+  doc.setFillColor(26, 95, 180);
+  doc.rect(0, 0, W, 80, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+  doc.text(settings.bizName || 'SMITH Diesel', margin, 36);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('Equipment Job Costing', margin, 52);
+  if (settings.contact) doc.text(settings.contact, margin, 65);
+  if (settings.phone) doc.text(settings.phone, margin + 120, 65);
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text('INVOICE', W - margin, 36, { align: 'right' });
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('Job #' + job.id, W - margin, 52, { align: 'right' });
+  doc.text(new Date(job.createdAt).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}), W - margin, 65, { align: 'right' });
+
+  y = 110;
+  doc.setTextColor(26, 37, 53);
+
+  // Job info
+  doc.setFillColor(240, 244, 248);
+  doc.rect(margin, y, W - margin*2, 56, 'F');
+  doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+  doc.text('Equipment:', margin + 10, y + 18);
+  doc.setFont('helvetica', 'normal');
+  doc.text(job.equipment, margin + 90, y + 18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Customer:', margin + 10, y + 36);
+  doc.setFont('helvetica', 'normal');
+  doc.text(job.customer || '—', margin + 90, y + 36);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Status:', margin + 10, y + 52);
+  doc.setFont('helvetica', 'normal');
+  doc.text(job.status === 'open' ? 'Open' : 'Closed', margin + 90, y + 52);
+  y += 72;
+
+  // Line items header
+  doc.setFillColor(26, 95, 180);
+  doc.rect(margin, y, W - margin*2, 22, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+  doc.text('DESCRIPTION', margin + 8, y + 15);
+  doc.text('TYPE', col2 - 60, y + 15);
+  doc.text('AMOUNT', W - margin - 8, y + 15, { align: 'right' });
+  y += 28;
+
+  doc.setTextColor(26, 37, 53);
+  const items = job.items || [];
+  items.forEach((item, idx) => {
+    if (y > 700) { doc.addPage(); y = 48; }
+    if (idx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin*2, 22, 'F'); }
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    let desc = item.name;
+    if (item.type === 'labor') desc += ' (' + item.hours + 'h @ $' + item.rate + '/hr)';
+    else if (item.vendor) desc += ' — ' + item.vendor;
+    if (desc.length > 55) desc = desc.substring(0, 52) + '...';
+    doc.text(desc, margin + 8, y + 12);
+    doc.setFontSize(9);
+    const typeLabels = { part: 'Part', labor: 'Labor', diag: 'Diagnostic' };
+    doc.text(typeLabels[item.type] || '', col2 - 60, y + 12);
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+    doc.text(fmt(item.amount), W - margin - 8, y + 12, { align: 'right' });
+    y += 22;
+  });
+
+  if (items.length === 0) {
+    doc.setFontSize(10); doc.setFont('helvetica', 'italic'); doc.setTextColor(107, 125, 148);
+    doc.text('No line items recorded.', margin + 8, y + 12);
+    doc.setTextColor(26, 37, 53);
+    y += 22;
+  }
+
+  y += 10;
+  // Totals
+  doc.setFillColor(240, 244, 248);
+  doc.rect(col2 - 20, y, W - col2 - margin + 20, 80, 'F');
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('Parts:', col2, y + 16); doc.text(fmt(jobPartsCost(job)), W - margin - 8, y + 16, { align: 'right' });
+  doc.text('Labor:', col2, y + 32); doc.text(fmt(jobLaborCost(job)), W - margin - 8, y + 32, { align: 'right' });
+  doc.text('Diagnostics:', col2, y + 48); doc.text(fmt(jobDiagCost(job)), W - margin - 8, y + 48, { align: 'right' });
+  doc.setDrawColor(208, 217, 228); doc.line(col2, y + 55, W - margin, y + 55);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+  doc.text('TOTAL:', col2, y + 72);
+  doc.setTextColor(26, 95, 180);
+  doc.text(fmt(jobTotal(job)), W - margin - 8, y + 72, { align: 'right' });
+  y += 90;
+
+  // Notes
+  if (job.notes) {
+    doc.setTextColor(26, 37, 53);
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+    doc.text('Notes:', margin, y + 14);
+    doc.setFont('helvetica', 'normal');
+    const lines = doc.splitTextToSize(job.notes, W - margin*2 - 50);
+    doc.text(lines, margin + 46, y + 14);
+    y += lines.length * 14 + 20;
+  }
+
+  // Footer
+  doc.setTextColor(107, 125, 148); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+  doc.text('Generated by SMITH Diesel Equipment Job Costing', W/2, 760, { align: 'center' });
+
+  const filename = 'SMITH-Diesel-' + job.id + '-' + job.equipment.replace(/[^a-zA-Z0-9]/g,'_').substring(0,20) + '.pdf';
+  doc.save(filename);
+  toast('PDF saved ✓');
+}
+
+// ===================== CSV EXPORT =====================
+function exportCSV() {
+  const closed = jobs.filter(j => j.status === 'closed');
+  if (closed.length === 0) { toast('No closed jobs to export'); return; }
+  const rows = [['Job ID', 'Equipment', 'Customer', 'Date', 'Parts', 'Labor', 'Diagnostics', 'Total', 'Notes']];
+  closed.forEach(job => {
+    rows.push([
+      job.id, job.equipment, job.customer || '',
+      new Date(job.createdAt).toLocaleDateString('en-US'),
+      jobPartsCost(job).toFixed(2), jobLaborCost(job).toFixed(2),
+      jobDiagCost(job).toFixed(2), jobTotal(job).toFixed(2),
+      (job.notes || '').replace(/,/g, ';').replace(/\n/g, ' ')
+    ]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'SMITH-Diesel-Jobs-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV exported ✓');
+}
+
+// ===================== BACKUP / RESTORE =====================
+function exportBackup() {
+  const data = { jobs, settings, exportedAt: new Date().toISOString(), version: 2 };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'SMITH-Diesel-Backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Backup saved ✓');
+}
+
+function restoreBackup(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.jobs || !Array.isArray(data.jobs)) { alert('Invalid backup file.'); return; }
+      if (!confirm('This will replace all current jobs with the backup. Continue?')) return;
+      jobs = data.jobs;
+      if (data.settings) { settings = data.settings; localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+      saveJobs(); renderList(); toast('Backup restored ✓ — ' + jobs.length + ' jobs loaded');
+    } catch(err) { alert('Could not read backup file.'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ===================== CLEAR DATA =====================
+function clearAllData() {
+  if (!confirm('This will permanently delete ALL jobs. Are you absolutely sure?')) return;
+  if (!confirm('Final confirmation — delete everything?')) return;
+  jobs = []; saveJobs(); renderList(); toast('All data cleared');
+}
+
+// ===================== SERVICE WORKER =====================
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE = 'smithdiesel-v2';
+const URLS = [self.location.href];
+self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS))));
+self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match(e.request)))));
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))));
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+}
+
+// ===================== CUSTOMER INVOICE =====================
+function openInvoiceModal() {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+  // Pre-fill saved markup default
+  document.getElementById('inv-markup').value = settings.defaultMarkup || '';
+  document.getElementById('modal-invoice').classList.add('open');
+}
+
+function generateCustomerInvoice() {
+  const job = jobs.find(j => j.id === currentJobId);
+  if (!job) return;
+
+  const markupPct = parseFloat(document.getElementById('inv-markup').value) || 0;
+  const showItemized = document.getElementById('inv-itemized').checked;
+  const showLaborDetail = document.getElementById('inv-labor-detail').checked;
+  const showDiag = document.getElementById('inv-show-diag').checked;
+
+  // Save markup as default for next time
+  settings.defaultMarkup = markupPct;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+
+  if (typeof window.jspdf === 'undefined' && typeof jspdf === 'undefined') {
+    toast('PDF library loading — try again in a moment'); return;
+  }
+  const { jsPDF } = window.jspdf || jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const W = 612, margin = 48;
+  let y = 0;
+
+  // Header
+  doc.setFillColor(26, 95, 180);
+  doc.rect(0, 0, W, 72, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24); doc.setFont('helvetica', 'bold');
+  doc.text(settings.bizName || 'SMITH Diesel', margin, 34);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  if (settings.phone) doc.text(settings.phone, margin, 52);
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text('INVOICE', W - margin, 34, { align: 'right' });
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('Invoice #' + job.id, W - margin, 50, { align: 'right' });
+  doc.text(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), W - margin, 64, { align: 'right' });
+
+  y = 96;
+  doc.setTextColor(26, 37, 53);
+
+  // Bill To
+  doc.setFillColor(240, 244, 248);
+  doc.rect(margin, y, W - margin * 2, 48, 'F');
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+  doc.text('BILL TO:', margin + 10, y + 16);
+  doc.setFont('helvetica', 'normal');
+  doc.text(job.customer || 'Customer', margin + 10, y + 30);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Equipment:', margin + 240, y + 16);
+  doc.setFont('helvetica', 'normal');
+  doc.text(job.equipment, margin + 310, y + 16);
+  y += 64;
+
+  // Line items header
+  doc.setFillColor(26, 95, 180);
+  doc.rect(margin, y, W - margin * 2, 22, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+  doc.text('DESCRIPTION', margin + 8, y + 15);
+  doc.text('AMOUNT', W - margin - 8, y + 15, { align: 'right' });
+  y += 28;
+  doc.setTextColor(26, 37, 53);
+
+  const items = job.items || [];
+  let invoiceTotal = 0;
+  let rowIdx = 0;
+
+  // PARTS
+  const parts = items.filter(i => i.type === 'part');
+  if (parts.length > 0) {
+    if (showItemized) {
+      parts.forEach(item => {
+        if (y > 680) { doc.addPage(); y = 48; }
+        const markedUp = Number(item.amount) * (1 + markupPct / 100);
+        invoiceTotal += markedUp;
+        if (rowIdx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin * 2, 22, 'F'); }
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        doc.text(item.name, margin + 8, y + 12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmt(markedUp), W - margin - 8, y + 12, { align: 'right' });
+        y += 22; rowIdx++;
+      });
+    } else {
+      // Parts as single line
+      const partsTotal = parts.reduce((s, i) => s + Number(i.amount), 0) * (1 + markupPct / 100);
+      invoiceTotal += partsTotal;
+      if (rowIdx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin * 2, 22, 'F'); }
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+      doc.text('Parts & Materials', margin + 8, y + 12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(fmt(partsTotal), W - margin - 8, y + 12, { align: 'right' });
+      y += 22; rowIdx++;
+    }
+  }
+
+  // LABOR
+  const laborItems = items.filter(i => i.type === 'labor');
+  if (laborItems.length > 0) {
+    const laborTotal = laborItems.reduce((s, i) => s + Number(i.amount), 0);
+    invoiceTotal += laborTotal;
+    if (showLaborDetail) {
+      laborItems.forEach(item => {
+        if (y > 680) { doc.addPage(); y = 48; }
+        if (rowIdx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin * 2, 22, 'F'); }
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+        const desc = item.name + (item.tech ? ' (' + item.tech + ')' : '');
+        doc.text(desc.length > 55 ? desc.substring(0, 52) + '...' : desc, margin + 8, y + 12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmt(item.amount), W - margin - 8, y + 12, { align: 'right' });
+        y += 22; rowIdx++;
+      });
+    } else {
+      if (y > 680) { doc.addPage(); y = 48; }
+      if (rowIdx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin * 2, 22, 'F'); }
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+      doc.text('Labor Services', margin + 8, y + 12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(fmt(laborTotal), W - margin - 8, y + 12, { align: 'right' });
+      y += 22; rowIdx++;
+    }
+  }
+
+  // DIAGNOSTICS
+  if (showDiag) {
+    const diagItems = items.filter(i => i.type === 'diag' && Number(i.amount) > 0);
+    diagItems.forEach(item => {
+      if (y > 680) { doc.addPage(); y = 48; }
+      invoiceTotal += Number(item.amount);
+      if (rowIdx % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(margin, y - 4, W - margin * 2, 22, 'F'); }
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+      doc.text(item.name.length > 55 ? item.name.substring(0, 52) + '...' : item.name, margin + 8, y + 12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(fmt(item.amount), W - margin - 8, y + 12, { align: 'right' });
+      y += 22; rowIdx++;
+    });
+  }
+
+  y += 12;
+
+  // Total box
+  doc.setDrawColor(208, 217, 228);
+  doc.line(margin, y, W - margin, y);
+  y += 16;
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text('TOTAL DUE', margin, y + 4);
+  doc.setTextColor(26, 95, 180);
+  doc.setFontSize(18);
+  doc.text(fmt(invoiceTotal), W - margin - 8, y + 4, { align: 'right' });
+  y += 30;
+
+  // Notes (customer-visible)
+  if (job.notes) {
+    doc.setTextColor(26, 37, 53);
+    doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+    doc.text('Notes:', margin, y + 14);
+    doc.setFont('helvetica', 'normal');
+    const lines = doc.splitTextToSize(job.notes, W - margin * 2 - 46);
+    doc.text(lines, margin + 40, y + 14);
+    y += lines.length * 12 + 20;
+  }
+
+  // Thank you footer
+  y += 20;
+  doc.setTextColor(107, 125, 148); doc.setFontSize(10); doc.setFont('helvetica', 'italic');
+  doc.text('Thank you for your business!', W / 2, y, { align: 'center' });
+
+  const pdfBlob = doc.output('blob');
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  window.open(pdfUrl, '_blank');
+  closeModal('invoice');
+  toast('Invoice opened — tap Share to send ✓');
+}
+
+// ===================== INIT =====================
+loadAll();
+renderList();
+checkInstallBanner();
+registerSW();
+</script>
+</body>
+</html>
